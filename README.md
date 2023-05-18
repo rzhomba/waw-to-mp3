@@ -1,6 +1,6 @@
 ### Зависимости
 
-* [Node.js](https://nodejs.org/) 14.8 or newer
+* [Node.js](https://nodejs.org/) 14.8 или выше
 * [LAME](https://lame.sourceforge.io)
 
 ### Запуск
