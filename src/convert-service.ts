@@ -1,5 +1,6 @@
 import { parentPort, workerData } from 'worker_threads'
-import path from 'path'
+import { basename, dirname, join } from 'path'
+import { ensureDir } from 'fs-extra'
 import { Lame } from 'node-lame'
 import { type ConverterRequest } from './types.js'
 
@@ -7,10 +8,11 @@ const data = workerData as ConverterRequest
 
 const input = data.file
 
-const output = path.join(
-  path.dirname(input),
-  path.basename(input, '.wav') + '.mp3'
-)
+const output = data.saveTo === undefined
+  ? join(dirname(input), basename(input, '.wav') + '.mp3')
+  : join(data.saveTo, basename(input, '.wav') + '.mp3')
+
+await ensureDir(dirname(output))
 
 const encoder = new Lame({
   output

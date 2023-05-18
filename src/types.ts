@@ -5,6 +5,7 @@ export interface Arg {
 
 export interface ConverterRequest {
   file: string
+  saveTo?: string
 }
 
 export interface ConverterResponse {
