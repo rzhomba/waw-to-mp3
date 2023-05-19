@@ -1,5 +1,4 @@
 import { argv } from 'process'
-import { sep } from 'path'
 import axios from 'axios'
 import { type Arg } from './types.js'
 import { getDirContents } from './directory.js'
@@ -19,7 +18,7 @@ const dirArg = args.find(a => a.name === 'dir')
 if (dirArg === undefined || dirArg.value === undefined) {
   throw new Error('Missing dir argument')
 }
-const directories = dirArg.value.split(sep)
+const directories = dirArg.value.split(',')
 
 const saveArg = args.find(a => a.name === 'save')
 const save = saveArg !== undefined
