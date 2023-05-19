@@ -4,12 +4,16 @@ export interface Arg {
 }
 
 export interface ConverterRequest {
-  file: string
+  files: string[]
   saveTo?: string
 }
 
-export interface ConverterResponse {
+export interface ConvertedFile {
   input: string
   output: string
   status: string
+}
+
+export interface ConverterResponse {
+  converted: ConvertedFile[]
 }
