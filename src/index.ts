@@ -1,8 +1,8 @@
 import { argv } from 'process'
 import axios from 'axios'
-import { type Arg } from './types.js'
 import { getDirContents } from './directory.js'
 import { convertFiles } from './convert.js'
+import { type Arg, type ConvertedFile } from './types.js'
 
 const args: Arg[] = []
 for (const arg of argv.slice(2)) {
@@ -36,19 +36,20 @@ const saveTo = save
   ? `var/spool/asterisk/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
   : undefined
 
-const result = await convertFiles({ files, saveTo })
+const send = (files: ConvertedFile[]): void => {
+  if (url !== undefined) {
+    axios.post(url, { converted: files.map(f => f.output) })
+      .catch(e => {
+        if (e instanceof Error) {
+          console.error(`Error: ${e.message}`)
+        }
+      })
+  }
+}
+
+const result = await convertFiles({ files, saveTo }, send, 1000)
 const converted = result
   .filter(r => r.status === 'Success')
   .map(r => r.output)
 
 console.info('Done: ', converted)
-
-if (url !== undefined) {
-  try {
-    await axios.post(url, { converted })
-  } catch (e: unknown) {
-    if (e instanceof Error) {
-      console.error(`Error: ${e.message}`)
-    }
-  }
-}

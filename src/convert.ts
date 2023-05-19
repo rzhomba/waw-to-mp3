@@ -15,9 +15,16 @@ export const runConvertService = async (workerData: any): Promise<ConverterRespo
   })
 }
 
-export const convertFiles = async (data: ConverterRequest): Promise<ConvertedFile[]> => {
+export const convertFiles = async (
+  data: ConverterRequest,
+  batchCb?: (files: ConvertedFile[]) => void,
+  batchSize?: number
+): Promise<ConvertedFile[]> => {
   const { files, saveTo } = data
-  const converted: ConvertedFile[] = []
+  const allConverted: ConvertedFile[] = []
+
+  let batchCount = 0
+  let batchConverted: ConvertedFile[] = []
 
   let fileChunks: string[][] = []
   for (let i = cpus().length; i > 0; i--) {
@@ -32,8 +39,28 @@ export const convertFiles = async (data: ConverterRequest): Promise<ConvertedFil
     }
 
     const result = await runConvertService(data)
-    converted.push(...result.converted)
+    allConverted.push(...result.converted)
+    batchConverted.push(...result.converted)
+
+    batchCount += result.converted.length
+
+    if (batchSize !== undefined && batchCount >= batchSize) {
+      let tempList: ConvertedFile[] = []
+      let tempCount = 0
+      if (batchCount > batchSize) {
+        tempList = batchConverted.splice(batchConverted.length - (batchCount - batchSize))
+        tempCount = tempList.length
+      }
+
+      batchCb?.(batchConverted)
+      batchCount = tempCount
+      batchConverted = tempList
+    }
   }))
 
-  return converted
+  if (batchConverted.length > 0) {
+    batchCb?.(batchConverted)
+  }
+
+  return allConverted
 }
